@@ -50,7 +50,67 @@ router.get("/media", async (req, res) => {
     }
 })
 
-router.get("/")
+router.get("/pesquisa", async (req, res) => {
+    const { marca, preco } = req.query
+
+    try {
+        const filtros: any = {}
+
+        if (marca) filtros.marca = marca;
+        if (preco) filtros.preco = { lte: Number(preco) }
+
+        const notebooks = await prisma.notebook.findMany({ where: filtros })
+        res.status(200).json(notebooks)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ erro: "Erro no servidor..." })
+    }
+})
+
+router.get("/marca", async (req, res) => {
+    try {
+        const marcasCount = await prisma.notebook.groupBy({
+            by: ["marca"],
+            _count: { id: true },
+            orderBy: { _count: { id: "desc" } }
+        })
+
+        const retorno = marcasCount.map((item) => ({
+            marca: item.marca,
+            quantidade: item._count.id
+        }))
+
+        res.status(200).json(retorno)
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ erro: "Erro no servidor..." })
+    }
+})
+
+router.get("/promocao", async (req, res) => {
+    try {
+        const notebooks = await prisma.notebook.findMany({
+            select: {
+                modelo: true,
+                marca: true,
+                preco: true,
+            },
+        })
+
+        const notebook2 = notebooks.map(notebook => {
+            const desconto = (notebook.marca == "Acer" || notebook.marca == "Dell") ? 0.10 : 0.20
+            return {
+                ...notebook,
+                precoPromocao: (Number(notebook.preco) * (1 - desconto)).toFixed(2),
+            }
+        })
+        res.status(200).json(notebook2)
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ erro: "Erro no servidor..." })
+    }
+})
 
 router.post("/", async (req, res) => {
     const { modelo, marca, processador, preco, quantidade } = req.body
