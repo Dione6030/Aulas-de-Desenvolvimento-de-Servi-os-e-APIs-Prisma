@@ -7,17 +7,31 @@ datasource db {
   provider = "mysql"
 }
 
-model Notebook {
+model Selecao {
   id          Int         @id @default(autoincrement())
-  modelo      String      @db.VarChar(200)
-  marca       String      @db.VarChar(200)
-  processador Processador
-  preco       Decimal     @db.Decimal(10, 2)
-  quantidade  Int?        @db.SmallInt
-  @@map("notebooks")
+  pais        String      @db.VarChar(100)
+  continente  String      @db.VarChar(100)
+  treinador   String      @db.VarChar(100)
+  numCopas    Int?        @db.SmallInt
+  jogadores   Jogador[]
+  @@map("selecoes")
 }
 
-enum Processador {
-  Intel
-  AMD
+model Jogador {
+  id          Int         @id @default(autoincrement())
+  nome        String      @db.VarChar(100)
+  posicao     Posicao
+  selecaoId   Int
+  dataNasc    DateTime
+  numCamisa   Int         @db.SmallInt
+  selecao     Selecao     @relation(fields: [selecaoId], references: [id])
+  @@map("jogadores")
+}
+
+enum Posicao {
+  Goleiro
+  Lateral
+  Zagueiro
+  Meio_Campo
+  Atacante
 }
