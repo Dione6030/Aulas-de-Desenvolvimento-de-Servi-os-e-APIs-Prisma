@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Candidata {
+  id              Int           @id @default(autoincrement())
+  nome            String        @db.VarChar(60)
+  clube           String        @db.VarChar(60)
+  idade           Int           @db.SmallInt
+  escolaridade    Escolaridade
+  @@map("candidatas")
+}
+
+model Cliente {
+  id          Int         @id @default(autoincrement())
+  nome        String      @db.VarChar(100)
+  posicao     Posicao
+  selecaoId   Int
+  dataNasc    DateTime
+  numCamisa   Int         @db.SmallInt
+  selecao     Selecao     @relation(fields: [selecaoId], references: [id])
+  @@map("clientes")
+}
+
+model Voto {
+
+}
+
+enum Escolaridade {
+  Ensino_Medio
+  Graduacao
+  Pos_Graduacao
+}
